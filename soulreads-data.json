@@ -1,6 +1,22 @@
 {
-  "books": [],
+  "books": [
+    {
+      "id": 1777448372071,
+      "title": "AS A MAN THINKETH",
+      "author": "James Allen",
+      "pages": 28,
+      "status": "todo",
+      "color": "#5a7a62",
+      "note": "What should I think, when I missed myself",
+      "virtues": [
+        "Courage",
+        "Discipline",
+        "Compassion"
+      ],
+      "currentPage": 0
+    }
+  ],
   "logs": [],
   "vocab": [],
-  "lastSync": "2026-04-29T07:36:23.596Z"
+  "lastSync": "2026-04-29T07:39:34.819Z"
 }
