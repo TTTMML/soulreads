@@ -5,7 +5,7 @@
       "title": "AS A MAN THINKETH",
       "author": "James Allen",
       "pages": 28,
-      "status": "todo",
+      "status": "reading",
       "color": "#5a7a62",
       "note": "What should I think, when I missed myself",
       "virtues": [
@@ -13,10 +13,21 @@
         "Discipline",
         "Compassion"
       ],
-      "currentPage": 0
+      "currentPage": 3
     }
   ],
-  "logs": [],
+  "logs": [
+    {
+      "id": 1777448713868,
+      "date": "2026-04-29",
+      "bookId": 1777448372071,
+      "from": 1,
+      "to": 3,
+      "summary": "My first time taking a look at my self, with a classic book, to recognize my self .",
+      "thoughts": "To read myself of proper charecter, as a native speaker.",
+      "vocab": []
+    }
+  ],
   "vocab": [],
-  "lastSync": "2026-04-29T07:39:34.819Z"
+  "lastSync": "2026-04-29T07:45:17.310Z"
 }
