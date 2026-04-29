@@ -770,6 +770,34 @@ async function uploadToGitHub() {
   clearMessages();
   
   try {
+    // 步骤1：先获取文件的当前状态（获取 sha）
+    let sha = null;
+    try {
+      const getResponse = await fetch(getGitHubApiUrl(), {
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${githubConfig.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      
+      if (getResponse.status === 200) {
+        const fileData = await getResponse.json();
+        sha = fileData.sha;
+        console.log('获取到文件 sha:', sha);
+      } else if (getResponse.status === 404) {
+        console.log('文件不存在，将创建新文件');
+        sha = null;
+      } else {
+        const errorData = await getResponse.json().catch(() => ({}));
+        throw new Error(`获取文件信息失败 HTTP ${getResponse.status}: ${errorData.message || getResponse.statusText}`);
+      }
+    } catch (getError) {
+      console.error('获取文件信息错误:', getError);
+      // 继续尝试上传，让 PUT 请求自己处理
+    }
+    
+    // 步骤2：准备数据
     const data = {
       books: state.books,
       logs: state.logs,
@@ -779,17 +807,18 @@ async function uploadToGitHub() {
     
     // 使用 UTF-8 安全编码
     const content = utf8ToBase64(JSON.stringify(data, null, 2));
-    const sha = localStorage.getItem('sr_github_sha');
     
     const body = {
       message: `Update SoulReads data - ${new Date().toLocaleString()}`,
       content: content
     };
     
+    // 如果有 sha，表示更新现有文件；没有则表示创建新文件
     if (sha) {
       body.sha = sha;
     }
     
+    // 步骤3：上传文件
     const response = await fetch(getGitHubApiUrl(), {
       method: 'PUT',
       headers: {
@@ -804,6 +833,9 @@ async function uploadToGitHub() {
       const errorData = await response.json().catch(() => ({}));
       
       // 处理特定错误
+      if (response.status === 422 && errorData.message && errorData.message.includes('sha')) {
+        throw new Error('文件已存在但缺少版本信息，请先点击"从 GitHub 下载"同步后再上传');
+      }
       if (response.status === 409) {
         throw new Error('文件冲突：GitHub 上的数据已被修改，请先下载最新版本');
       }
