@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoulReads — Character Cultivation Through Literature</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --parchment:#f7f3eb;
+  --parchment-dark:#ede8dc;
+  --leather:#3d2b1f;
+  --leather-mid:#6b4c38;
+  --leather-light:#a07858;
+  --gold:#c9a84c;
+  --gold-light:#e8d5a3;
+  --gold-pale:#f9f3e3;
+  --ink:#2a1f15;
+  --ink-mid:#5c4535;
+  --ink-light:#8a6e5a;
+  --sage-deep:#3a5442;
+  --sage:#5a7a62;
+  --sage-light:#d4e4d8;
+  --cream:#faf8f3;
+  --border-fine:rgba(61,43,31,0.12);
+  --border-gold:rgba(201,168,76,0.3);
+  --error:#8b3a3a;
+  --error-bg:#fdf0f0;
+  --success:#2e5a2e;
+  --success-bg:#e8f0e8;
+}
+
+body{background:transparent;font-family:'Crimson Pro',Georgia,serif;color:var(--ink);}
+
+.app{max-width:680px;margin:0 auto;padding:0 0 3rem;}
+
+/* HERO HEADER */
+.hero{
+  padding:2rem 0 1.5rem;
+  border-bottom:1px solid var(--border-gold);
+  margin-bottom:0;
+  position:relative;
+}
+.hero::before{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.hero-eyebrow{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;font-weight:300;
+}
+.hero-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:400;line-height:1.2;
+  color:var(--leather);letter-spacing:-0.5px;
+}
+.hero-title em{font-style:italic;color:var(--gold);}
+.hero-sub{
+  font-family:'Crimson Pro',serif;font-size:15px;
+  color:var(--ink-light);margin-top:6px;font-weight:300;font-style:italic;
+}
+.hero-meta{
+  display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;
+}
+.hero-stat{
+  display:flex;flex-direction:column;align-items:center;
+  padding:8px 16px;
+  background:var(--gold-pale);
+  border:0.5px solid var(--border-gold);
+  border-radius:4px;
+}
+.hero-stat-num{font-family:'Playfair Display',serif;font-size:20px;color:var(--leather);font-weight:600;}
+.hero-stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-top:1px;}
+.save-badge{
+  margin-left:auto;align-self:flex-start;
+  font-size:11px;color:var(--sage);letter-spacing:1px;
+  opacity:0;transition:opacity 0.4s;padding-top:10px;
+}
+.save-badge.show{opacity:1;}
+
+/* SYNC STATUS */
+.sync-status{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;
+  background:var(--parchment-dark);
+  border:0.5px solid var(--border-fine);
+  border-radius:4px;
+  margin-top:12px;
+  font-size:12px;
+}
+.sync-status.online{color:var(--sage-deep);}
+.sync-status.offline{color:var(--ink-light);}
+.sync-status.syncing{color:var(--gold);}
+.sync-status.error{color:var(--error);background:var(--error-bg);}
+.sync-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:currentColor;
+}
+.sync-actions{
+  margin-left:auto;
+  display:flex;gap:6px;
+}
+.sync-btn{
+  padding:4px 12px;
+  font-size:11px;
+  background:var(--leather);
+  color:var(--gold-light);
+  border:none;
+  border-radius:3px;
+  cursor:pointer;
+}
+.sync-btn:hover{background:var(--ink);}
+.sync-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.sync-btn-secondary{
+  background:transparent;
+  color:var(--ink-mid);
+  border:0.5px solid var(--border-fine);
+}
+.sync-btn-secondary:hover{background:var(--parchment);color:var(--leather);}
+
+/* ERROR MESSAGE */
+.error-message{
+  padding:10px 12px;
+  background:var(--error-bg);
+  border:0.5px solid rgba(139,58,58,0.3);
+  border-radius:4px;
+  margin-top:10px;
+  font-size:12px;
+  color:var(--error);
+  display:none;
+}
+.error-message.show{display:block;}
+
+/* SUCCESS MESSAGE */
+.success-message{
+  padding:10px 12px;
+  background:var(--success-bg);
+  border:0.5px solid rgba(46,90,46,0.3);
+  border-radius:4px;
+  margin-top:10px;
+  font-size:12px;
+  color:var(--success);
+  display:none;
+}
+.success-message.show{display:block;}
+
+/* GITHUB CONFIG MODAL */
+.modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(42,31,21,0.6);
+  display:none;align-items:center;justify-content:center;
+  z-index:1000;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:var(--cream);
+  border:0.5px solid var(--border-gold);
+  border-radius:8px;
+  padding:2rem;
+  max-width:420px;width:90%;
+  box-shadow:0 8px 32px rgba(61,43,31,0.2);
+}
+.modal-title{
+  font-family:'Playfair Display',serif;
+  font-size:20px;color:var(--leather);
+  margin-bottom:1rem;
+}
+.modal-text{
+  font-size:14px;line-height:1.6;
+  color:var(--ink-mid);margin-bottom:1.5rem;
+}
+.modal-input{
+  width:100%;padding:10px 12px;
+  border:0.5px solid var(--border-fine);
+  border-radius:4px;font-size:14px;
+  font-family:'Crimson Pro',serif;
+  background:var(--parchment);color:var(--ink);
+  margin-bottom:1rem;
+}
+.modal-input:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(201,168,76,0.12);
+  outline:none;
+}
+.modal-actions{
+  display:flex;gap:10px;justify-content:flex-end;
+}
+.modal-error{
+  padding:10px 12px;
+  background:var(--error-bg);
+  border:0.5px solid rgba(139,58,58,0.3);
+  border-radius:4px;
+  margin-bottom:1rem;
+  font-size:12px;
+  color:var(--error);
+  display:none;
+}
+.modal-error.show{display:block;}
+
+/* QUOTE BANNER */
+.quote-banner{
+  padding:1.2rem 1.5rem;
+  background:var(--leather);
+  border-radius:0;
+  margin-bottom:0;
+  position:relative;overflow:hidden;
+}
+.quote-banner::before{
+  content:'\201C';
+  position:absolute;top:-10px;left:12px;
+  font-family:'Playfair Display',serif;
+  font-size:80px;color:var(--gold);opacity:0.2;
+  line-height:1;
+}
+.quote-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;font-style:italic;font-weight:300;
+  color:var(--gold-light);line-height:1.6;
+  position:relative;z-index:1;
+}
+.quote-author{
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--leather-light);margin-top:8px;
+}
+
+/* NAV */
+.nav{
+  display:flex;gap:0;margin:0;
+  border-bottom:1px solid var(--border-fine);
+  background:var(--parchment);
+}
+.nav-btn{
+  flex:1;padding:12px 8px;
+  border:none;border-bottom:2px solid transparent;
+  background:transparent;
+  font-family:'Crimson Pro',serif;font-size:13px;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;color:var(--ink-light);
+  transition:all 0.2s;text-align:center;
+}
+.nav-btn:hover{color:var(--leather);background:rgba(201,168,76,0.06);}
+.nav-btn.active{
+  color:var(--leather);border-bottom-color:var(--gold);
+  font-weight:500;background:rgba(201,168,76,0.06);
+}
+
+.view{display:none;padding:1.5rem 0;}.view.active{display:block;}
+
+/* CARDS */
+.panel{
+  background:var(--cream);
+  border:0.5px solid var(--border-fine);
+  border-radius:6px;
+  padding:1.4rem;
+  margin-bottom:1rem;
+}
+.panel-title{
+  font-family:'Playfair Display',serif;
+  font-size:16px;font-weight:400;
+  color:var(--leather);
+  margin-bottom:1rem;
+  padding-bottom:8px;
+  border-bottom:0.5px solid var(--border-gold);
+  display:flex;align-items:center;gap:8px;
+}
+.panel-title .ornament{color:var(--gold);font-size:14px;}
+
+/* FORMS */
+label.fl{
+  display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink-light);margin-bottom:5px;font-family:'Crimson Pro',serif;
+}
+input[type=text],input[type=number],input[type=date],textarea,select{
+  width:100%;padding:9px 12px;
+  border:0.5px solid var(--border-fine);
+  border-radius:4px;font-size:14px;
+  font-family:'Crimson Pro',serif;
+  background:var(--parchment);color:var(--ink);
+  margin-bottom:10px;outline:none;
+  transition:border-color 0.2s;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(201,168,76,0.12);
+}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+
+.row{display:flex;gap:10px;margin-bottom:0;}.row>*{flex:1;}
+
+/* BUTTONS */
+.btn{
+  padding:9px 20px;border-radius:4px;
+  border:0.5px solid var(--border-fine);
+  font-family:'Crimson Pro',serif;font-size:14px;
+  cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;
+}
+.btn-primary{background:var(--leather);color:var(--gold-light);border-color:var(--leather);}
+.btn-primary:hover{background:var(--ink);}
+.btn-gold{background:var(--gold);color:var(--leather);border-color:var(--gold);font-weight:500;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-ghost{background:transparent;color:var(--ink-light);border-color:var(--border-fine);}
+.btn-ghost:hover{background:var(--parchment-dark);color:var(--leather);}
+.btn-sm{padding:4px 10px;font-size:12px;}
+.btn-danger{background:transparent;color:#8b3a3a;border-color:#c07070;}
+.btn-danger:hover{background:#fdf0f0;}
+
+/* BOOK ITEMS */
+.book-item{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 0;
+  border-bottom:0.5px solid var(--border-fine);
+  animation:fadeSlide 0.3s ease;
+}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.book-item:last-child{border-bottom:none;}
+.book-spine{
+  width:7px;min-height:50px;border-radius:2px;
+  flex-shrink:0;margin-top:3px;
+  position:relative;
+}
+.book-spine::after{
+  content:'';position:absolute;top:2px;left:1px;bottom:2px;width:1px;
+  background:rgba(255,255,255,0.3);border-radius:1px;
+}
+.book-info{flex:1;}
+.book-title{
+  font-family:'Playfair Display',serif;
+  font-size:15px;font-weight:400;color:var(--leather);
+}
+.book-author{
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:13px;color:var(--ink-light);margin-top:2px;
+}
+.book-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+.badge{
+  font-size:10px;padding:2px 8px;border-radius:2px;
+  letter-spacing:1px;text-transform:uppercase;
+  font-family:'Crimson Pro',serif;
+}
+.badge-status-reading{background:var(--sage-light);color:var(--sage-deep);}
+.badge-status-done{background:#e8f0e8;color:#2e5a2e;}
+.badge-status-todo{background:var(--parchment-dark);color:var(--ink-light);}
+.badge-tag{background:var(--gold-pale);color:var(--leather-mid);border:0.5px solid var(--border-gold);}
+.progress-bar{height:3px;background:var(--parchment-dark);border-radius:1px;margin-top:7px;}
+.progress-fill{height:100%;border-radius:1px;transition:width 0.4s ease;}
+
+/* LOG ENTRIES */
+.log-entry{
+  padding:14px;
+  background:var(--parchment);
+  border:0.5px solid var(--border-fine);
+  border-radius:4px;
+  margin-bottom:10px;
+  border-left:3px solid var(--gold);
+  animation:fadeSlide 0.3s ease;
+}
+.log-date{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);margin-bottom:4px;}
+.log-book{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;margin-bottom:6px;}
+.log-summary{font-size:15px;color:var(--ink);line-height:1.65;}
+.log-thoughts{font-size:13px;color:var(--ink-light);font-style:italic;margin-top:6px;padding-top:6px;border-top:0.5px dashed var(--border-fine);line-height:1.5;}
+.log-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.vocab-chip{
+  font-size:11px;padding:2px 8px;
+  background:var(--leather);color:var(--gold-light);
+  border-radius:2px;letter-spacing:0.5px;
+  font-family:'Crimson Pro',serif;
+}
+
+/* VOCAB */
+.vocab-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 0;
+  border-bottom:0.5px solid var(--border-fine);
+  animation:fadeSlide 0.25s ease;
+}
+.vocab-item:last-child{border-bottom:none;}
+.vocab-number{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;color:var(--border-gold);
+  min-width:24px;padding-top:3px;font-style:italic;
+}
+.word-en{
+  font-family:'Playfair Display',serif;
+  font-size:17px;font-weight:400;color:var(--leather);
+}
+.word-cat{
+  display:inline-block;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  padding:1px 6px;margin-left:6px;
+  border-radius:2px;vertical-align:middle;
+  font-family:'Crimson Pro',serif;
+}
+.word-note{font-size:14px;color:var(--ink-mid);margin-top:3px;line-height:1.55;}
+.word-src{font-size:12px;color:var(--ink-light);font-style:italic;margin-top:3px;}
+
+/* VIRTUE CATEGORIES */
+.cat-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:8px;margin-bottom:12px;
+}
+.cat-pill{
+  padding:8px 12px;border-radius:4px;
+  border:0.5px solid var(--border-fine);
+  background:var(--parchment);
+  font-family:'Crimson Pro',serif;font-size:13px;
+  color:var(--ink-mid);cursor:pointer;text-align:center;
+  transition:all 0.15s;
+}
+.cat-pill:hover{border-color:var(--gold);color:var(--leather);}
+.cat-pill.active{background:var(--leather);color:var(--gold-light);border-color:var(--leather);}
+.cat-pill .cat-count{font-size:11px;opacity:0.7;display:block;margin-top:1px;}
+
+/* REVIEW CARDS */
+.review-card{
+  background:var(--parchment);
+  border:0.5px solid var(--border-fine);
+  border-radius:6px;padding:1.5rem;
+  margin-bottom:1rem;
+  border-top:3px solid var(--leather);
+  transition:box-shadow 0.2s;
+}
+.review-card:hover{box-shadow:0 2px 12px rgba(61,43,31,0.08);}
+.review-label{
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--ink-light);margin-bottom:10px;
+}
+.review-q{font-family:'Playfair Display',serif;font-size:18px;color:var(--leather);margin-bottom:1.2rem;line-height:1.4;}
+.review-a{font-size:15px;color:var(--ink-mid);line-height:1.6;padding-top:1rem;border-top:0.5px dashed var(--border-fine);}
+.empty{font-size:14px;color:var(--ink-light);font-style:italic;padding:2rem 0;text-align:center;}
+
+/* SPINE SWATCHES */
+.spine-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.spine-swatch{width:28px;height:28px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:transform 0.15s;}
+.spine-swatch:hover{transform:scale(1.1);}
+.spine-swatch.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--gold);}
+
+/* VIRTUE TAGS */
+.vtag-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.vtag{font-size:11px;padding:4px 10px;border-radius:3px;border:0.5px solid var(--border-fine);background:var(--parchment);color:var(--ink-mid);cursor:pointer;transition:all 0.15s;}
+.vtag:hover{border-color:var(--gold);color:var(--leather);}
+.vtag.sel{background:var(--leather);color:var(--gold-light);border-color:var(--leather);}
+
+/* CHART */
+.chart-wrap{height:220px;margin-top:10px;}
+
+/* HELP TEXT */
+.help-text{
+  font-size:12px;
+  color:var(--ink-light);
+  margin-top:4px;
+  line-height:1.5;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="hero-eyebrow">The Art of Reading</div>
+    <h1 class="hero-title">Soul<em>Reads</em></h1>
+    <p class="hero-sub">Character cultivation through literature</p>
+    
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num" id="hs-books">0</span><span class="hero-stat-label">Books</span></div>
+      <div class="hero-stat"><span class="hero-stat-num" id="hs-vocab">0</span><span class="hero-stat-label">Words</span></div>
+      <div class="hero-stat"><span class="hero-stat-num" id="hs-streak">0</span><span class="hero-stat-label">Day Streak</span></div>
+      <span class="save-badge" id="save-badge">Saved</span>
+    </div>
+    
+    <!-- Sync Status -->
+    <div class="sync-status offline" id="sync-status">
+      <span class="sync-dot"></span>
+      <span id="sync-text">本地模式 — 未连接 GitHub</span>
+      <div class="sync-actions">
+        <button class="sync-btn sync-btn-secondary" id="sync-btn-download" onclick="downloadFromGitHub()" disabled>从 GitHub 下载</button>
+        <button class="sync-btn" id="sync-btn-upload" onclick="uploadToGitHub()" disabled>上传到 GitHub</button>
+        <button class="sync-btn sync-btn-secondary" id="sync-btn-config" onclick="showConfigModal()">配置</button>
+      </div>
+    </div>
+    
+    <!-- Error/Success Messages -->
+    <div class="error-message" id="error-message"></div>
+    <div class="success-message" id="success-message"></div>
+  </header>
+
+  <div class="quote-banner">
+    <p class="quote-text" id="quote-text">"Reading is to the mind what exercise is to the body."</p>
+    <p class="quote-author" id="quote-author">— Joseph Addison</p>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchView('library')">Library</button>
+    <button class="nav-btn" onclick="switchView('journal')">Journal</button>
+    <button class="nav-btn" onclick="switchView('lexicon')">Lexicon</button>
+    <button class="nav-btn" onclick="switchView('review')">Review</button>
+  </nav>
+
+  <!-- LIBRARY VIEW -->
+  <section class="view active" id="view-library">
+    <div class="panel">
+      <div class="panel-title"><span class="ornament">&#10022;</span> Add a Book</div>
+      <label class="fl">Title</label>
+      <input type="text" id="b-title" placeholder="e.g., Meditations">
+      <div class="row">
+        <div><label class="fl">Author</label><input type="text" id="b-author" placeholder="e.g., Marcus Aurelius"></div>
+        <div><label class="fl">Pages</label><input type="number" id="b-pages" placeholder="e.g., 304"></div>
+      </div>
+      <label class="fl">Status</label>
+      <select id="b-status"><option value="todo">To Read</option><option value="reading">Currently Reading</option><option value="done">Completed</option></select>
+      <label class="fl">Spine Color</label>
+      <div class="spine-grid" id="spine-grid"></div>
+      <label class="fl">Virtue Tags</label>
+      <div class="vtag-grid" id="b-virtue-tags"></div>
+      <label class="fl">Private Note</label>
+      <textarea id="b-note" placeholder="Why this book? What do you hope to gain?"></textarea>
+      <button class="btn btn-primary" onclick="addBook()">Add to Library</button>
+    </div>
+    <div id="book-list"></div>
+  </section>
+
+  <!-- JOURNAL VIEW -->
+  <section class="view" id="view-journal">
+    <div class="panel">
+      <div class="panel-title"><span class="ornament">&#10022;</span> New Entry</div>
+      <label class="fl">Date</label>
+      <input type="date" id="l-date">
+      <div class="row">
+        <div><label class="fl">Book</label><select id="l-book"><option value="">— Select a book —</option></select></div>
+        <div style="display:flex;gap:10px;">
+          <div style="flex:1"><label class="fl">From Page</label><input type="number" id="l-from" placeholder="0"></div>
+          <div style="flex:1"><label class="fl">To Page</label><input type="number" id="l-to" placeholder="0"></div>
+        </div>
+      </div>
+      <label class="fl">Insights & Summary</label>
+      <textarea id="l-summary" placeholder="What did you learn? How did this passage speak to you?"></textarea>
+      <label class="fl">Reflections & Connections</label>
+      <textarea id="l-thoughts" placeholder="How does this relate to your life? What virtues or vices does it illuminate?"></textarea>
+      <label class="fl">Vocabulary (comma-separated)</label>
+      <input type="text" id="l-vocab" placeholder="e.g., equanimity, logos, arete">
+      <button class="btn btn-primary" onclick="addLog()">Save Entry</button>
+    </div>
+    <div id="log-list"></div>
+  </section>
+
+  <!-- LEXICON VIEW -->
+  <section class="view" id="view-lexicon">
+    <div class="panel">
+      <div class="panel-title"><span class="ornament">&#10022;</span> Add a Word</div>
+      <div class="row">
+        <div><label class="fl">Word</label><input type="text" id="v-word" placeholder="e.g., magnanimity"></div>
+        <div><label class="fl">From Book</label><select id="v-book"><option value="">— Optional —</option></select></div>
+      </div>
+      <label class="fl">Virtue Category</label>
+      <div class="vtag-grid" id="v-virtue-tags"></div>
+      <label class="fl">Definition / Notes</label>
+      <textarea id="v-note" placeholder="What does this word mean? How might you use it?"></textarea>
+      <button class="btn btn-primary" onclick="addVocab()">Add to Lexicon</button>
+    </div>
+    <div class="panel" style="padding:1rem 1.4rem;">
+      <input type="text" id="v-search" placeholder="Search your lexicon..." oninput="renderVocab()" style="margin-bottom:0;">
+    </div>
+    <div class="cat-grid" id="cat-filter"></div>
+    <div id="vocab-list"></div>
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn btn-ghost" onclick="downloadCSV()">Download CSV</button>
+    </div>
+  </section>
+
+  <!-- REVIEW VIEW -->
+  <section class="view" id="view-review">
+    <div class="panel">
+      <div class="panel-title"><span class="ornament">&#10022;</span> Daily Review</div>
+      <p style="font-size:14px;color:var(--ink-mid);margin-bottom:1rem;">Strengthen memory through active recall. Flip cards to test yourself.</p>
+      <div style="display:flex;gap:10px;margin-bottom:1rem;">
+        <button class="btn btn-gold" onclick="genReview()">Shuffle All</button>
+        <button class="btn btn-ghost" onclick="genReview('vocab')">Words Only</button>
+        <button class="btn btn-ghost" onclick="genReview('notes')">Notes Only</button>
+      </div>
+      <div id="review-stack"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span class="ornament">&#10022;</span> Reading Velocity</div>
+      <div class="chart-wrap"><canvas id="pagesChart"></canvas></div>
+    </div>
+  </section>
+</div>
+
+<!-- GitHub Config Modal -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <h3 class="modal-title">GitHub 配置</h3>
+    <p class="modal-text">
+      配置 GitHub 仓库信息以同步数据。所有数据将存储在仓库的 <code>soulreads-data.json</code> 文件中。
+    </p>
+    <div class="modal-error" id="config-error"></div>
+    <div id="config-step-1">
+      <label class="fl">GitHub 用户名</label>
+      <input type="text" class="modal-input" id="github-owner" placeholder="例如：yourusername">
+      
+      <label class="fl">仓库名称</label>
+      <input type="text" class="modal-input" id="github-repo" placeholder="例如：soulreads-data">
+      
+      <label class="fl">Personal Access Token</label>
+      <input type="text" class="modal-input" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <p class="help-text">
+        Token 需要 <code>repo</code> 权限。创建地址：<a href="https://github.com/settings/tokens" target="_blank" style="color:var(--gold);">github.com/settings/tokens</a>
+      </p>
+      
+      <div class="modal-actions" style="margin-top:1rem;">
+        <button class="btn btn-ghost" onclick="hideConfigModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveGitHubConfig()">保存配置</button>
+      </div>
+    </div>
+    <div id="config-step-2" style="display:none;">
+      <p style="font-size:14px;color:var(--sage-deep);margin-bottom:1rem;">
+        &#10003; 配置已保存！Token 存储在浏览器本地。
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="hideConfigModal()">完成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ==================== CONFIGURATION ====================
+const DATA_FILENAME = 'soulreads-data.json';
+
+// ==================== STATE ====================
+let state = {books:[],logs:[],vocab:[]};
+let selSpine = '#3d2b1f';
+let rChart = null;
+let saveTimer;
+
+// GitHub Config
+let githubConfig = {
+  owner: '',
+  repo: '',
+  token: ''
+};
+
+// ==================== VIRTUE COLORS ====================
+const VIRTUE_COLORS = {
+  'Wisdom':'#5a7a62','Courage':'#8b4513','Temperance':'#6b8e9f',
+  'Justice':'#c9a84c','Discipline':'#4a5568','Integrity':'#2d5a5a',
+  'Humility':'#8a7a6a','Compassion':'#9b6b7a','Resilience':'#6b5a7a'
+};
+
+const SPINE_COLORS = ['#3d2b1f','#6b4c38','#8b4513','#5a4a3a','#4a5568','#2d5a5a','#5a7a62','#6b8e9f','#8a7a6a','#9b6b7a','#6b5a7a','#7a6b5a'];
+
+const QUOTES = [
+  {t:"Reading is to the mind what exercise is to the body.",a:"Joseph Addison"},
+  {t:"A room without books is like a body without a soul.",a:"Cicero"},
+  {t:"The reading of all good books is like conversation with the finest minds of past centuries.",a:"Descartes"},
+  {t:"Books are a uniquely portable magic.",a:"Stephen King"},
+  {t:"Reading brings us unknown friends.",a:"Honoré de Balzac"}
+];
+
+// ==================== GITHUB API FUNCTIONS ====================
+
+// 获取 GitHub API 基础 URL
+function getGitHubApiUrl() {
+  return `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${DATA_FILENAME}`;
+}
+
+// 从 GitHub 下载数据
+async function downloadFromGitHub() {
+  if (!isConfigValid()) {
+    showError('请先配置 GitHub 信息');
+    showConfigModal();
+    return;
+  }
+  
+  updateSyncStatus('syncing', '正在从 GitHub 下载...');
+  clearMessages();
+  
+  try {
+    const response = await fetch(getGitHubApiUrl(), {
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${githubConfig.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    
+    if (response.status === 404) {
+      // 文件不存在，创建空文件
+      showError('GitHub 上暂无数据文件，请先上传');
+      updateSyncStatus('offline', 'GitHub 无数据 — 请先上传');
+      return;
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.content) {
+      throw new Error('返回数据格式错误');
+    }
+    
+    // 解码 base64 内容
+    const content = atob(data.content.replace(/\n/g, ''));
+    const parsed = JSON.parse(content);
+    
+    // 保存到 state
+    state.books = parsed.books || [];
+    state.logs = parsed.logs || [];
+    state.vocab = parsed.vocab || [];
+    
+    // 保存到 localStorage
+    await persistLocal();
+    
+    // 保存 sha 用于后续上传
+    localStorage.setItem('sr_github_sha', data.sha);
+    
+    render();
+    showSuccess('成功从 GitHub 下载数据！');
+    updateSyncStatus('online', '已同步 — ' + new Date().toLocaleTimeString());
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    showError('下载失败: ' + error.message);
+    updateSyncStatus('error', '下载失败');
+  }
+}
+
+// 上传数据到 GitHub
+async function uploadToGitHub() {
+  if (!isConfigValid()) {
+    showError('请先配置 GitHub 信息');
+    showConfigModal();
+    return;
+  }
+  
+  updateSyncStatus('syncing', '正在上传到 GitHub...');
+  clearMessages();
+  
+  try {
+    const data = {
+      books: state.books,
+      logs: state.logs,
+      vocab: state.vocab,
+      lastSync: new Date().toISOString()
+    };
+    
+    const content = btoa(JSON.stringify(data, null, 2));
+    const sha = localStorage.getItem('sr_github_sha');
+    
+    const body = {
+      message: `Update SoulReads data - ${new Date().toLocaleString()}`,
+      content: content
+    };
+    
+    if (sha) {
+      body.sha = sha;
+    }
+    
+    const response = await fetch(getGitHubApiUrl(), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${githubConfig.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      // 处理特定错误
+      if (response.status === 409) {
+        throw new Error('文件冲突：GitHub 上的数据已被修改，请先下载最新版本');
+      }
+      if (response.status === 401) {
+        throw new Error('认证失败：Token 无效或已过期');
+      }
+      if (response.status === 403) {
+        throw new Error('权限不足：请检查 Token 是否有 repo 权限');
+      }
+      if (response.status === 404) {
+        throw new Error('仓库不存在：请检查用户名和仓库名称');
+      }
+      
+      throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    // 保存新的 sha
+    if (result.content && result.content.sha) {
+      localStorage.setItem('sr_github_sha', result.content.sha);
+    }
+    
+    showSuccess('成功上传到 GitHub！');
+    updateSyncStatus('online', '已同步 — ' + new Date().toLocaleTimeString());
+    
+  } catch (error) {
+    console.error('Upload error:', error);
+    showError('上传失败: ' + error.message);
+    updateSyncStatus('error', '上传失败');
+  }
+}
+
+// 检查配置是否有效
+function isConfigValid() {
+  return githubConfig.owner && githubConfig.repo && githubConfig.token;
+}
+
+// ==================== UI FUNCTIONS ====================
+function updateSyncStatus(status, text) {
+  const el = document.getElementById('sync-status');
+  const txt = document.getElementById('sync-text');
+  const btnDownload = document.getElementById('sync-btn-download');
+  const btnUpload = document.getElementById('sync-btn-upload');
+  
+  el.className = 'sync-status ' + status;
+  txt.textContent = text;
+  
+  // 启用/禁用按钮
+  const enabled = isConfigValid();
+  btnDownload.disabled = !enabled;
+  btnUpload.disabled = !enabled;
+}
+
+function showError(message) {
+  const el = document.getElementById('error-message');
+  el.textContent = message;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 8000);
+}
+
+function showSuccess(message) {
+  const el = document.getElementById('success-message');
+  el.textContent = message;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function clearMessages() {
+  document.getElementById('error-message').classList.remove('show');
+  document.getElementById('success-message').classList.remove('show');
+}
+
+// ==================== CONFIG MODAL ====================
+function showConfigModal() {
+  document.getElementById('config-modal').classList.add('show');
+  document.getElementById('config-step-1').style.display = 'block';
+  document.getElementById('config-step-2').style.display = 'none';
+  document.getElementById('config-error').classList.remove('show');
+  
+  // 填充已有配置
+  if (githubConfig.owner) document.getElementById('github-owner').value = githubConfig.owner;
+  if (githubConfig.repo) document.getElementById('github-repo').value = githubConfig.repo;
+  if (githubConfig.token) document.getElementById('github-token').value = githubConfig.token;
+}
+
+function hideConfigModal() {
+  document.getElementById('config-modal').classList.remove('show');
+}
+
+function saveGitHubConfig() {
+  const owner = document.getElementById('github-owner').value.trim();
+  const repo = document.getElementById('github-repo').value.trim();
+  const token = document.getElementById('github-token').value.trim();
+  
+  if (!owner || !repo || !token) {
+    showConfigError('请填写所有字段');
+    return;
+  }
+  
+  // 保存配置
+  githubConfig = { owner, repo, token };
+  localStorage.setItem('sr_github_owner', owner);
+  localStorage.setItem('sr_github_repo', repo);
+  localStorage.setItem('sr_github_token', token);
+  
+  // 清除旧的 sha，下次下载会获取新的
+  localStorage.removeItem('sr_github_sha');
+  
+  document.getElementById('config-step-1').style.display = 'none';
+  document.getElementById('config-step-2').style.display = 'block';
+  
+  updateSyncStatus('offline', '已配置 — 点击下载或上传');
+}
+
+function showConfigError(message) {
+  const el = document.getElementById('config-error');
+  el.textContent = message;
+  el.classList.add('show');
+}
+
+// ==================== CORE FUNCTIONS ====================
+async function persist() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await persistLocal();
+      const b = document.getElementById('save-badge');
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 2200);
+    } catch(e) {}
+  }, 500);
+}
+
+async function persistLocal() {
+  localStorage.setItem('sr_books', JSON.stringify(state.books));
+  localStorage.setItem('sr_logs', JSON.stringify(state.logs));
+  localStorage.setItem('sr_vocab', JSON.stringify(state.vocab));
+}
+
+async function boot() {
+  setQuote();
+  
+  // 加载 GitHub 配置
+  const savedOwner = localStorage.getItem('sr_github_owner');
+  const savedRepo = localStorage.getItem('sr_github_repo');
+  const savedToken = localStorage.getItem('sr_github_token');
+  
+  if (savedOwner) githubConfig.owner = savedOwner;
+  if (savedRepo) githubConfig.repo = savedRepo;
+  if (savedToken) githubConfig.token = savedToken;
+  
+  // 更新同步状态
+  if (isConfigValid()) {
+    updateSyncStatus('offline', '已配置 — 点击下载或上传');
+  } else {
+    updateSyncStatus('offline', '本地模式 — 未配置 GitHub');
+  }
+  
+  // 从 localStorage 加载数据
+  try {
+    const rb = localStorage.getItem('sr_books');
+    const rl = localStorage.getItem('sr_logs');
+    const rv = localStorage.getItem('sr_vocab');
+    if (rb) state.books = JSON.parse(rb);
+    if (rl) state.logs = JSON.parse(rl);
+    if (rv) state.vocab = JSON.parse(rv);
+  } catch(e) {}
+  
+  render();
+}
+
+function setQuote() {
+  const q = QUOTES[new Date().getDate() % QUOTES.length];
+  document.getElementById('quote-text').textContent = q.t;
+  document.getElementById('quote-author').textContent = '— ' + q.a;
+}
+
+function updateHero() {
+  document.getElementById('hs-books').textContent = state.books.length;
+  document.getElementById('hs-vocab').textContent = state.vocab.length;
+  
+  // Calculate streak
+  const dates = [...new Set(state.logs.map(l => l.date))].sort();
+  let streak = 0;
+  const today = new Date().toISOString().slice(0,10);
+  if (dates.includes(today)) streak = 1;
+  let d = new Date(); d.setDate(d.getDate() - 1);
+  while (dates.includes(d.toISOString().slice(0,10))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  document.getElementById('hs-streak').textContent = streak;
+}
+
+// ==================== VIEW SWITCHING ====================
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  if (name === 'review') drawChart();
+}
+
+// ==================== LIBRARY ====================
+function renderSpines() {
+  document.getElementById('spine-grid').innerHTML = SPINE_COLORS.map(c => 
+    `<div class="spine-swatch${c===selSpine?' sel':''}" style="background:${c}" data-c="${c}" onclick="pickSpine(this)"></div>`
+  ).join('');
+}
+
+function renderVirtueTags(containerId, selected=[]) {
+  const cats = Object.keys(VIRTUE_COLORS);
+  document.getElementById(containerId).innerHTML = cats.map(c => 
+    `<div class="vtag${selected.includes(c)?' sel':''}" onclick="this.classList.toggle('sel')" data-v="${c}">${c}</div>`
+  ).join('');
+}
+
+function getSelVirtues(containerId) {
+  return [...document.querySelectorAll(`#${containerId} .vtag.sel`)].map(el => el.dataset.v);
+}
+
+function pickSpine(el) {
+  document.querySelectorAll('.spine-swatch').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+  selSpine = el.dataset.c;
+}
+
+function addBook() {
+  const title = document.getElementById('b-title').value.trim();
+  if (!title) return alert('Please enter a title.');
+  state.books.push({
+    id: Date.now(), title,
+    author: document.getElementById('b-author').value.trim(),
+    pages: parseInt(document.getElementById('b-pages').value) || 0,
+    status: document.getElementById('b-status').value,
+    color: selSpine,
+    note: document.getElementById('b-note').value.trim(),
+    virtues: getSelVirtues('b-virtue-tags'),
+    currentPage: 0
+  });
+  persist(); renderBooks(); updateBookSelects(); updateHero();
+  ['b-title','b-author','b-pages','b-note'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('b-status').value = 'todo';
+  document.querySelectorAll('#b-virtue-tags .vtag').forEach(t => t.classList.remove('sel'));
+}
+
+function deleteBook(id) {
+  if (!confirm('Remove this book?')) return;
+  state.books = state.books.filter(b => b.id !== id);
+  persist(); renderBooks(); updateBookSelects(); updateHero();
+}
+
+function renderBooks() {
+  const list = document.getElementById('book-list');
+  const order = ['reading','todo','done'];
+  const all = [...state.books].sort((a,b) => order.indexOf(a.status) - order.indexOf(b.status));
+  if (!all.length) { list.innerHTML = '<div class="empty">Your library awaits its first volume...</div>'; return; }
+  const labels = {todo:'To Read', reading:'Currently Reading', done:'Completed'};
+  list.innerHTML = all.map(b => {
+    const pct = b.pages ? Math.round(Math.min(b.currentPage/b.pages*100, 100)) : 0;
+    const vTags = (b.virtues || []).map(v => `<span class="badge badge-tag">${v}</span>`).join('');
+    return `<div class="book-item">
+      <div class="book-spine" style="background:${b.color}"></div>
+      <div class="book-info">
+        <div class="book-title">${b.title}</div>
+        ${b.author?`<div class="book-author">${b.author}</div>`:''}
+        <div class="book-meta">
+          <span class="badge badge-status-${b.status}">${labels[b.status]}</span>
+          ${b.note?`<span class="badge badge-tag">${b.note}</span>`:''}
+          ${vTags}
+          ${b.pages?`<span class="badge" style="background:var(--parchment-dark);color:var(--ink-light)">${b.currentPage}/${b.pages} pp.</span>`:''}
+        </div>
+        ${b.pages?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${b.color}"></div></div>`:''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteBook(${b.id})">Remove</button>
+    </div>`;
+  }).join('');
+}
+
+function updateBookSelects() {
+  const opts = state.books.map(b => `<option value="${b.id}">${b.title}</option>`).join('');
+  document.getElementById('l-book').innerHTML = '<option value="">— Select a book —</option>' + opts;
+  document.getElementById('v-book').innerHTML = '<option value="">— Optional —</option>' + opts;
+}
+
+// ==================== JOURNAL ====================
+function addLog() {
+  const summary = document.getElementById('l-summary').value.trim();
+  if (!summary) return alert('Please enter your insights.');
+  const bookId = parseInt(document.getElementById('l-book').value) || null;
+  const from = parseInt(document.getElementById('l-from').value) || 0;
+  const to = parseInt(document.getElementById('l-to').value) || 0;
+  const raw = document.getElementById('l-vocab').value.trim();
+  const words = raw ? raw.split(',').map(w => w.trim()).filter(Boolean) : [];
+  const log = {
+    id: Date.now(),
+    date: document.getElementById('l-date').value || new Date().toISOString().slice(0,10),
+    bookId, from, to, summary,
+    thoughts: document.getElementById('l-thoughts').value.trim(),
+    vocab: words
+  };
+  state.logs.unshift(log);
+  if (bookId && to > from) {
+    const book = state.books.find(b => b.id === bookId);
+    if (book) { book.currentPage = Math.max(book.currentPage, to); if (book.status === 'todo') book.status = 'reading'; }
+  }
+  words.forEach(w => {
+    if (!state.vocab.find(v => v.word.toLowerCase() === w.toLowerCase()))
+      state.vocab.push({id:Date.now()+Math.random(), word:w, note:'', bookId, virtue:'', date:log.date});
+  });
+  persist(); renderLogs(); renderBooks(); updateHero();
+  ['l-summary','l-thoughts','l-vocab','l-from','l-to'].forEach(i => document.getElementById(i).value = '');
+}
+
+function renderLogs() {
+  const list = document.getElementById('log-list');
+  if (!state.logs.length) { list.innerHTML = '<div class="empty">Begin your first journal entry...</div>'; return; }
+  list.innerHTML = state.logs.map(log => {
+    const book = state.books.find(b => b.id === log.bookId);
+    const pp = (log.from && log.to) ? ` · pp. ${log.from}–${log.to}` : '';
+    return `<div class="log-entry">
+      <div class="log-date">${log.date}${pp}</div>
+      ${book?`<div class="log-book" style="color:${book.color}">${book.title}</div>`:''}
+      <div class="log-summary">${log.summary}</div>
+      ${log.thoughts?`<div class="log-thoughts">${log.thoughts}</div>`:''}
+      ${log.vocab.length?`<div class="log-chips">${log.vocab.map(w => `<span class="vocab-chip">${w}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ==================== VOCABULARY ====================
+function addVocab() {
+  const word = document.getElementById('v-word').value.trim();
+  if (!word) return alert('Please enter a word.');
+  const virtue = getSelVirtues('v-virtue-tags')[0] || '';
+  state.vocab.unshift({
+    id: Date.now(), word,
+    bookId: parseInt(document.getElementById('v-book').value) || null,
+    note: document.getElementById('v-note').value.trim(),
+    virtue, date: new Date().toISOString().slice(0,10)
+  });
+  persist(); renderVocab(); updateHero();
+  ['v-word','v-note'].forEach(i => document.getElementById(i).value = '');
+  document.querySelectorAll('#v-virtue-tags .vtag').forEach(t => t.classList.remove('sel'));
+}
+
+function deleteVocab(id) {
+  state.vocab = state.vocab.filter(v => v.id !== id);
+  persist(); renderVocab(); updateHero();
+}
+
+let activeVirtueFilter = '';
+
+function renderCatFilter() {
+  const cats = ['All', ...Object.keys(VIRTUE_COLORS)];
+  const counts = {};
+  state.vocab.forEach(v => { if (v.virtue) counts[v.virtue] = (counts[v.virtue] || 0) + 1; });
+  document.getElementById('cat-filter').innerHTML = cats.map(c => `
+    <div class="cat-pill${activeVirtueFilter===c || (!activeVirtueFilter && c==='All')?' active':''}" onclick="setVFilter('${c}')">
+      ${c}<span class="cat-count">${c==='All'?state.vocab.length:(counts[c]||0)}</span>
+    </div>`).join('');
+}
+
+function setVFilter(cat) {
+  activeVirtueFilter = cat === 'All' ? '' : cat;
+  renderCatFilter(); renderVocab();
+}
+
+function renderVocab() {
+  const list = document.getElementById('vocab-list');
+  const q = (document.getElementById('v-search')?.value || '').trim().toLowerCase();
+  let items = state.vocab;
+  if (activeVirtueFilter) items = items.filter(v => v.virtue === activeVirtueFilter);
+  if (q) items = items.filter(v => v.word.toLowerCase().includes(q) || v.note.toLowerCase().includes(q));
+  if (!items.length) { list.innerHTML = '<div class="empty">' + (q || activeVirtueFilter ? 'No matching words found.' : 'Your lexicon is empty — begin collecting words of wisdom...') + '</div>'; return; }
+  list.innerHTML = `<div class="panel">${items.map((v,i) => {
+    const book = state.books.find(b => b.id === v.bookId);
+    const vc = v.virtue ? VIRTUE_COLORS[v.virtue] || '#888' : '';
+    const catBadge = v.virtue ? `<span class="word-cat" style="background:${vc}22;color:${vc};border:0.5px solid ${vc}55">${v.virtue}</span>` : '';
+    return `<div class="vocab-item">
+      <div class="vocab-number">${i+1}</div>
+      <div style="flex:1">
+        <div><span class="word-en">${v.word}</span>${catBadge}</div>
+        ${v.note?`<div class="word-note">${v.note}</div>`:'<div class="word-note" style="color:#ccc;font-style:italic">No definition yet</div>'}
+        <div style="display:flex;gap:10px">
+          ${book?`<div class="word-src">— ${book.title}</div>`:''}
+          <div class="word-src" style="color:var(--ink-light)">${v.date||''}</div>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteVocab(${v.id})">×</button>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function downloadCSV() {
+  if (!state.vocab.length) return alert('Your lexicon is empty.');
+  const esc = s => `"${(s||'').replace(/"/g,'""')}"`;
+  const header = ['Word','Definition / Notes','Virtue Category','Source Book','Date Added'];
+  const rows = state.vocab.map(v => {
+    const book = state.books.find(b => b.id === v.bookId);
+    return [esc(v.word), esc(v.note), esc(v.virtue), esc(book?book.title:''), esc(v.date)].join(',');
+  });
+  const csv = '\uFEFF' + [header.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = `soulreads_lexicon_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ==================== REVIEW ====================
+function genReview(type) {
+  const cards = [];
+  if (!type || type === 'vocab') {
+    [...state.vocab].sort(() => Math.random() - 0.5).slice(0, 8).forEach(v => {
+      const book = state.books.find(b => b.id === v.bookId);
+      const vc = v.virtue ? VIRTUE_COLORS[v.virtue] : '#888';
+      cards.push({
+        label: v.virtue || 'Vocabulary',
+        q: `<span style="font-family:Playfair Display,serif;font-size:22px;color:var(--leather)">${v.word}</span><br><span style="font-size:13px;color:var(--ink-light)">What does this word mean?</span>`,
+        a: v.note || (book ? `From: ${book.title}` : '(No definition yet — try to recall the context)'),
+        color: vc
+      });
+    });
+  }
+  if (!type || type === 'notes') {
+    [...state.logs].sort(() => Math.random() - 0.5).slice(0, 5).forEach(log => {
+      const book = state.books.find(b => b.id === log.bookId);
+      if (book) cards.push({
+        label: book.title,
+        q: `<span style="font-size:13px;color:var(--ink-light)">From your journal on ${log.date}</span><br><span style="font-family:Playfair Display,serif;font-size:18px;color:var(--leather);margin-top:8px;display:block;">What insight did you record?</span>`,
+        a: log.summary,
+        color: book.color
+      });
+    });
+  }
+  
+  document.getElementById('review-stack').innerHTML = cards.map((c,i) => `
+    <div class="review-card" id="rc-${i}" onclick="this.classList.toggle('flipped')" style="cursor:pointer;">
+      <div class="review-label" style="color:${c.color}">${c.label}</div>
+      <div class="review-q">${c.q}</div>
+      <div class="review-a" style="display:none" id="ra-${i}">${c.a}</div>
+    </div>
+  `).join('');
+  
+  cards.forEach((c,i) => {
+    const card = document.getElementById(`rc-${i}`);
+    let flipped = false;
+    card.onclick = () => {
+      flipped = !flipped;
+      document.getElementById(`ra-${i}`).style.display = flipped ? 'block' : 'none';
+      card.style.borderTopColor = flipped ? c.color : 'var(--leather)';
+    };
+  });
+}
+
+function drawChart() {
+  const ctx = document.getElementById('pagesChart');
+  if (!ctx) return;
+  if (rChart) rChart.destroy();
+  const days = [];
+  for (let i=6; i>=0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const data = days.map(d => state.logs.filter(l => l.date === d).reduce((s,l) => s + ((l.to||0)-(l.from||0)), 0));
+  rChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days.map(d => d.slice(5)),
+      datasets: [{
+        label: 'Pages Read',
+        data: data,
+        backgroundColor: '#c9a84c',
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(61,43,31,0.08)' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ==================== RENDER ALL ====================
+function render() {
+  renderSpines();
+  renderVirtueTags('b-virtue-tags');
+  renderVirtueTags('v-virtue-tags');
+  renderBooks();
+  renderLogs();
+  renderCatFilter();
+  renderVocab();
+  updateBookSelects();
+  updateHero();
+  
+  // Set today's date
+  document.getElementById('l-date').value = new Date().toISOString().slice(0,10);
+}
+
+// ==================== INIT ====================
+boot();
+</script>
+</body>
+</html>
