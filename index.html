@@ -661,6 +661,34 @@ const QUOTES = [
 
 // ==================== GITHUB API FUNCTIONS ====================
 
+// UTF-8 安全的 Base64 编码（支持中文）
+function utf8ToBase64(str) {
+  // 使用 TextEncoder 将字符串转为 UTF-8 字节数组
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(str);
+  // 将字节数组转为二进制字符串
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  // 使用 btoa 编码
+  return btoa(binary);
+}
+
+// UTF-8 安全的 Base64 解码
+function base64ToUtf8(base64) {
+  // 先解码为二进制字符串
+  const binary = atob(base64);
+  // 转为字节数组
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  // 使用 TextDecoder 解码为 UTF-8 字符串
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(bytes);
+}
+
 // 获取 GitHub API 基础 URL
 function getGitHubApiUrl() {
   return `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${DATA_FILENAME}`;
@@ -704,8 +732,8 @@ async function downloadFromGitHub() {
       throw new Error('返回数据格式错误');
     }
     
-    // 解码 base64 内容
-    const content = atob(data.content.replace(/\n/g, ''));
+    // 解码 base64 内容（使用 UTF-8 安全解码）
+    const content = base64ToUtf8(data.content.replace(/\n/g, ''));
     const parsed = JSON.parse(content);
     
     // 保存到 state
@@ -749,7 +777,8 @@ async function uploadToGitHub() {
       lastSync: new Date().toISOString()
     };
     
-    const content = btoa(JSON.stringify(data, null, 2));
+    // 使用 UTF-8 安全编码
+    const content = utf8ToBase64(JSON.stringify(data, null, 2));
     const sha = localStorage.getItem('sr_github_sha');
     
     const body = {
@@ -803,7 +832,18 @@ async function uploadToGitHub() {
     
   } catch (error) {
     console.error('Upload error:', error);
-    showError('上传失败: ' + error.message);
+    let errorMsg = '上传失败';
+    
+    if (error.message) {
+      errorMsg = '上传失败: ' + error.message;
+    }
+    
+    // 特殊处理编码错误
+    if (error.message && error.message.includes('invalid characters')) {
+      errorMsg = '上传失败: 数据包含特殊字符，编码错误。请检查是否有表情符号或特殊符号。';
+    }
+    
+    showError(errorMsg);
     updateSyncStatus('error', '上传失败');
   }
 }
