@@ -30,6 +30,22 @@
   ],
   "vocab": [
     {
+      "id": 1777780328913,
+      "word": "category",
+      "bookId": null,
+      "note": "种类，范畴",
+      "virtue": "",
+      "date": "2026-05-03"
+    },
+    {
+      "id": 1777780279324,
+      "word": "appearance",
+      "bookId": null,
+      "note": "外表，外貌",
+      "virtue": "",
+      "date": "2026-05-03"
+    },
+    {
       "id": 1777714208520,
       "word": "conversation",
       "bookId": 1777448372071,
@@ -134,5 +150,5 @@
       "date": "2026-04-29"
     }
   ],
-  "lastSync": "2026-05-02T10:02:15.284Z"
+  "lastSync": "2026-05-03T03:52:12.765Z"
 }
